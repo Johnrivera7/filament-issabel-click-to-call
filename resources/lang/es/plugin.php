@@ -25,4 +25,6 @@ return [
     'call_started_title' => 'Llamando…',
     'call_started_body' => 'Conteste su anexo :extension. Luego se marcará a :destination.',
     'call_failed_title' => 'Error al llamar',
+    'section_dialplan' => 'Visor del teléfono (Issabel)',
+    'section_dialplan_help' => 'Issabel muestra el CNAM del anexo (ej. Mariela Lopez 2150) si no se instala el contexto filament-click-to-call en extensions_custom.conf. Vea docs/ISSABEL_VISOR_DESTINO.md o publique el tag filament-issabel-click-to-call-dialplan.',
 ];

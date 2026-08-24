@@ -25,4 +25,6 @@ return [
     'call_started_title' => 'Calling…',
     'call_started_body' => 'Answer your extension :extension. The system will dial :destination next.',
     'call_failed_title' => 'Call failed',
+    'section_dialplan' => 'Agent phone display (Issabel)',
+    'section_dialplan_help' => 'Issabel shows extension CNAM (e.g. agent name 2150) unless context filament-click-to-call is installed in extensions_custom.conf. See docs/ISSABEL_VISOR_DESTINO.md or publish tag filament-issabel-click-to-call-dialplan.',
 ];

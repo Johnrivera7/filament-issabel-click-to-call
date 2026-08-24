@@ -42,6 +42,63 @@ Filament plugin for **[Issabel](https://www.issabel.com/)** PBX **click-to-call*
 
 Filament does **not** carry audio — the PBX does.
 
+## Agent phone display (required Issabel dialplan)
+
+Issabel/FreePBX stores a **CNAM per extension** (e.g. *Mariela Lopez* on `2150`). If you originate directly to `SIP/2150`, the agent phone shows the **extension identity**, not the customer number — **AMI CallerID variables alone cannot override this** on stock Issabel.
+
+We added strategy **`custom_agent`**: originate to `Local/{anexo}@filament-click-to-call`, set display from `CTC_DEST` in dialplan, then dial outbound via `from-internal/{destino}`.
+
+### Why we need `[filament-click-to-call]` on the PBX
+
+| Approach | Agent display | Outbound dial |
+| --- | --- | --- |
+| Direct `SIP/anexo` + AMI CallerID | Extension CNAM (wrong) | May work |
+| Force `CALLERID(num)` = cell in AMI | Cell on display | Often **bad-number** / wrong route |
+| **`custom_agent` + custom context** | **Cell on display** | **Normal outbound route** |
+
+### One-time setup on Issabel
+
+Add to `/etc/asterisk/extensions_custom.conf`:
+
+```ini
+[filament-click-to-call]
+exten => _X.,1,NoOp(Filament click-to-call anexo ${EXTEN} destino ${CTC_DEST})
+ same => n,Set(CALLERID(name)=${IF($["${CTC_NAME}"=""]?${CTC_DEST}:${CTC_NAME})})
+ same => n,Set(CALLERID(num)=${IF($["${CTC_NUM}"=""]?${CTC_DEST}:${CTC_NUM})})
+ same => n,Set(CALLERID(name-pres)=allowed_not_screened)
+ same => n,Set(CALLERID(num-pres)=allowed_not_screened)
+ same => n,Dial(SIP/${EXTEN},30,m)
+ same => n,Hangup()
+```
+
+Use `PJSIP` instead of `SIP` in `Dial()` if your extensions are PJSIP. Then:
+
+```bash
+asterisk -rx "dialplan reload"
+```
+
+Publish the snippet from Laravel:
+
+```bash
+php artisan vendor:publish --tag=filament-issabel-click-to-call-dialplan
+```
+
+Full Spanish guide: [`docs/ISSABEL_VISOR_DESTINO.md`](docs/ISSABEL_VISOR_DESTINO.md)
+
+### `.env` for correct display
+
+```env
+ISSABEL_PBX_ORIGINATE_STRATEGY=custom_agent
+ISSABEL_PBX_AGENT_DIAL_CONTEXT=filament-click-to-call
+ISSABEL_PBX_CALLER_ID_DISPLAY=destination
+```
+
+Fallback without PBX dialplan (display stays extension CNAM):
+
+```env
+ISSABEL_PBX_ORIGINATE_STRATEGY=application_dial
+```
+
 ## Where to create AMI credentials (Issabel)
 
 ### Option A — Issabel web UI
@@ -76,6 +133,9 @@ ISSABEL_PBX_AMI_USER=kitinicio_originate
 ISSABEL_PBX_AMI_SECRET=YOUR_STRONG_SECRET
 ISSABEL_PBX_CHANNEL_DRIVER=PJSIP
 ISSABEL_PBX_DIAL_CONTEXT=from-internal
+ISSABEL_PBX_ORIGINATE_STRATEGY=custom_agent
+ISSABEL_PBX_AGENT_DIAL_CONTEXT=filament-click-to-call
+ISSABEL_PBX_CALLER_ID_DISPLAY=destination
 ```
 
 ## Network / Huawei Cloud
