@@ -126,9 +126,9 @@ final class IssabelAmiGateway
 
         return [
             'Variable: CALLERID(name,i)='.$displayNumber,
-            'Variable: CALLERID(num,i)='.$displayNumber,
+            'Variable: CALLERID(num,i)='.$extension,
             'Variable: CONNECTEDLINE(name,i)='.$displayNumber,
-            'Variable: CONNECTEDLINE(num,i)='.$displayNumber,
+            'Variable: CONNECTEDLINE(num,i)='.$extension,
             'Variable: REALCALLERIDNUM='.$extension,
         ];
     }
@@ -264,11 +264,11 @@ final class IssabelAmiGateway
         $localNumber = ChilePhoneNormalizer::normalize($callerIdNumber ?? $destination, withCountryCode: false)
             ?? $destination;
 
-        // Visor: solo celular destino. Issabel suele pisar con CNAM del anexo si no forzamos (i).
+        // Visor: celular en nombre; anexo en número (Issabel enruta la salida por anexo).
         $number = match ($mode) {
             'extension' => $extension,
             'custom' => $this->credentials->callerIdNumber ?: $extension,
-            default => $localNumber,
+            default => $extension,
         };
 
         $name = match ($mode) {
