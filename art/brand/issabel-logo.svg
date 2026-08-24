@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 52" role="img" aria-label="Issabel">
+  <g transform="translate(0 4)">
+    <circle cx="10" cy="10" r="7" fill="none" stroke="#1a1a1a" stroke-width="1.5"/>
+    <circle cx="28" cy="10" r="7" fill="#00B4D8"/>
+    <circle cx="46" cy="10" r="7" fill="#FF6B35"/>
+    <circle cx="10" cy="28" r="7" fill="#E91E8C"/>
+    <circle cx="28" cy="28" r="7" fill="#7B2CBF"/>
+    <circle cx="46" cy="28" r="7" fill="none" stroke="#1a1a1a" stroke-width="1.5"/>
+    <circle cx="28" cy="44" r="7" fill="#FFD60A"/>
+  </g>
+  <text x="68" y="36" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="28" font-weight="700" fill="#111827">Issabel</text>
+</svg>

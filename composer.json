@@ -1,0 +1,62 @@
+{
+    "name": "johnrivera7/filament-issabel-click-to-call",
+    "description": "Filament plugin for Issabel PBX click-to-call via Asterisk AMI — originate from tables, forms, and a credentials UI.",
+    "keywords": [
+        "filament",
+        "filament-plugin",
+        "laravel",
+        "issabel",
+        "asterisk",
+        "ami",
+        "pbx",
+        "voip",
+        "click-to-call",
+        "telephony"
+    ],
+    "homepage": "https://github.com/Johnrivera7/filament-issabel-click-to-call",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "John Rivera",
+            "email": "johnriveragonzalez7@gmail.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "filament/filament": "^4.0|^5.0",
+        "illuminate/contracts": "^11.28|^12.0|^13.0",
+        "illuminate/support": "^11.28|^12.0|^13.0",
+        "spatie/laravel-package-tools": "^1.16"
+    },
+    "require-dev": {
+        "laravel/pint": "^1.18",
+        "phpunit/phpunit": "^11.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "JohnRivera7\\FilamentIssabelClickToCall\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "JohnRivera7\\FilamentIssabelClickToCall\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "JohnRivera7\\FilamentIssabelClickToCall\\FilamentIssabelClickToCallServiceProvider"
+            ]
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "pint": "vendor/bin/pint"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

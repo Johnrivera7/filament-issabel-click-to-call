@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Issabel Click-to-Call thumbnail</title>
+  <style>
+    :root {
+      --iss-cyan: #00B4D8; --iss-purple: #7B2CBF; --iss-ink: #111827;
+      --iss-muted: #4B5563; --iss-border: #E5E7EB;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 1920px; height: 1080px; overflow: hidden;
+      font-family: "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+      background: linear-gradient(135deg, #fff 0%, #EFF6FF 100%);
+      color: var(--iss-ink);
+    }
+    .stage {
+      width: 1920px; height: 1080px; padding: 64px 80px;
+      display: grid; grid-template-columns: 1fr 1.1fr; gap: 48px; align-items: center;
+    }
+    img.logo { height: 72px; margin-bottom: 24px; }
+    h1 { font-size: 58px; line-height: 1.08; font-weight: 800; margin-bottom: 16px; }
+    h1 span { color: var(--iss-cyan); }
+    p { font-size: 26px; color: var(--iss-muted); max-width: 22ch; line-height: 1.4; }
+    .card {
+      background: #fff; border: 2px solid var(--iss-border); border-radius: 24px;
+      overflow: hidden; box-shadow: 0 24px 48px rgba(17,24,39,.1);
+    }
+    .bar { height: 8px; background: linear-gradient(90deg, var(--iss-cyan), var(--iss-purple)); }
+    .inner { padding: 32px 36px; }
+    .row {
+      display: grid; grid-template-columns: 1fr auto auto; gap: 20px; align-items: center;
+      padding: 20px; border: 1px solid var(--iss-border); border-radius: 14px; background: #FAFAFA;
+      margin-top: 20px;
+    }
+    .btn {
+      background: #16A34A; color: #fff; border: 0; border-radius: 10px;
+      padding: 12px 20px; font-size: 20px; font-weight: 800;
+    }
+    .mono { font-family: ui-monospace, Menlo, monospace; font-size: 22px; }
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <div>
+      <img class="logo" src="brand/issabel-logo.svg" alt="Issabel">
+      <h1>Click-to-Call <span>Issabel</span></h1>
+      <p>Filament plugin · Asterisk AMI · ring agent, dial customer</p>
+    </div>
+    <div class="card">
+      <div class="bar"></div>
+      <div class="inner">
+        <strong style="font-size:22px;color:var(--iss-muted)">DATOS ESTUDIANTE</strong>
+        <div class="row">
+          <div><strong>Fabiola Cristi</strong><br><span class="mono">9 5759 2274</span></div>
+          <div class="mono">Anexo 2151</div>
+          <button class="btn">📞 Llamar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

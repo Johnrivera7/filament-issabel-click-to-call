@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Issabel Click-to-Call — Filament plugin banner</title>
+  <style>
+    :root {
+      --iss-cyan: #00B4D8;
+      --iss-orange: #FF6B35;
+      --iss-pink: #E91E8C;
+      --iss-purple: #7B2CBF;
+      --iss-yellow: #FFD60A;
+      --iss-ink: #111827;
+      --iss-muted: #4B5563;
+      --iss-bg: #F8FAFC;
+      --iss-card: #FFFFFF;
+      --iss-border: #E5E7EB;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 2560px; height: 1440px; overflow: hidden;
+      font-family: "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+      background: var(--iss-bg); color: var(--iss-ink);
+    }
+    .stage {
+      width: 2560px; height: 1440px; position: relative;
+      padding: 96px 112px; display: grid;
+      grid-template-columns: 1.05fr 1fr; gap: 80px; align-items: center;
+      background:
+        radial-gradient(900px 600px at 8% 12%, rgba(0,180,216,.18), transparent 60%),
+        radial-gradient(800px 520px at 92% 88%, rgba(123,44,191,.14), transparent 55%),
+        radial-gradient(600px 400px at 85% 15%, rgba(255,107,53,.12), transparent 50%),
+        linear-gradient(145deg, #FFFFFF 0%, #F1F5F9 100%);
+    }
+    .dots { position: absolute; top: 72px; right: 120px; display: flex; gap: 10px; }
+    .dots span { width: 18px; height: 18px; border-radius: 50%; display: block; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 12px;
+      background: #fff; border: 1px solid var(--iss-border);
+      font-size: 26px; font-weight: 700; padding: 14px 22px; border-radius: 999px;
+      margin-bottom: 36px; color: var(--iss-purple);
+    }
+    .logo { height: 96px; margin-bottom: 36px; display: block; }
+    h1 {
+      font-size: 82px; line-height: 1.06; letter-spacing: -0.03em;
+      font-weight: 800; margin-bottom: 28px; max-width: 11ch;
+    }
+    h1 span {
+      background: linear-gradient(90deg, var(--iss-cyan), var(--iss-purple));
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .lead {
+      font-size: 34px; line-height: 1.4; color: var(--iss-muted);
+      max-width: 30ch; margin-bottom: 44px;
+    }
+    .pills { display: flex; flex-wrap: wrap; gap: 16px; }
+    .pill {
+      background: #fff; border: 1px solid var(--iss-border); border-radius: 16px;
+      padding: 18px 26px; font-size: 26px; font-weight: 700; color: var(--iss-ink);
+    }
+    .pill.alt { background: var(--iss-cyan); border-color: #0891b2; color: #fff; }
+    .card {
+      background: var(--iss-card); border: 2px solid var(--iss-border);
+      border-radius: 32px; overflow: hidden;
+      box-shadow: 0 40px 80px rgba(17,24,39,.12);
+    }
+    .accent-bar {
+      height: 10px;
+      background: linear-gradient(90deg, var(--iss-cyan), var(--iss-pink), var(--iss-orange), var(--iss-yellow));
+    }
+    .card-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 36px 44px; border-bottom: 1px solid var(--iss-border);
+      background: linear-gradient(180deg, #F8FAFC, #fff);
+    }
+    .card-head img { height: 52px; }
+    .tag {
+      font-size: 22px; font-weight: 800; color: #fff; background: var(--iss-purple);
+      border-radius: 999px; padding: 12px 20px;
+    }
+    .card-body { padding: 40px 44px 44px; display: grid; gap: 24px; }
+    .row-table {
+      display: grid; grid-template-columns: 1.2fr 1fr 1fr auto;
+      gap: 16px; align-items: center; padding: 22px 24px;
+      border: 1px solid var(--iss-border); border-radius: 16px; background: #FAFAFA;
+    }
+    .row-table.head { background: #F3F4F6; font-size: 20px; font-weight: 700; color: var(--iss-muted); }
+    .mono { font-family: ui-monospace, Menlo, monospace; font-size: 24px; }
+    .btn-call {
+      background: #16A34A; color: #fff; border: 0; border-radius: 12px;
+      padding: 14px 22px; font-size: 22px; font-weight: 800;
+      display: inline-flex; align-items: center; gap: 10px;
+    }
+    .field label { display: block; font-size: 20px; font-weight: 700; color: var(--iss-muted); margin-bottom: 8px; }
+    .field .input {
+      height: 64px; border: 2px solid var(--iss-border); border-radius: 14px;
+      background: #F9FAFB; display: flex; align-items: center; padding: 0 20px;
+      font-size: 26px; font-family: ui-monospace, Menlo, monospace;
+    }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .corner {
+      position: absolute; right: 112px; bottom: 48px;
+      font-size: 24px; color: var(--iss-muted); font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <div class="dots">
+      <span style="background:var(--iss-cyan)"></span>
+      <span style="background:var(--iss-orange)"></span>
+      <span style="background:var(--iss-pink)"></span>
+      <span style="background:var(--iss-purple)"></span>
+      <span style="background:var(--iss-yellow)"></span>
+    </div>
+    <div>
+      <div class="badge"><span>Filament 4.x / 5.x · Laravel 11–13</span></div>
+      <img class="logo" src="brand/issabel-logo.svg" alt="Issabel">
+      <h1>Click-to-Call <span>Issabel</span></h1>
+      <p class="lead">Originate calls from Filament tables and forms through Asterisk AMI — ring the agent extension, then dial the customer.</p>
+      <div class="pills">
+        <div class="pill alt">AMI Originate</div>
+        <div class="pill">Filament Action</div>
+        <div class="pill">Chile phone normalize</div>
+        <div class="pill">Settings UI</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="accent-bar"></div>
+      <div class="card-head">
+        <img src="brand/issabel-logo.svg" alt="">
+        <span class="tag">Cobranza · Ficha alumno</span>
+      </div>
+      <div class="card-body">
+        <div class="row-table head">
+          <div>Alumno</div><div>Celular</div><div>Anexo</div><div></div>
+        </div>
+        <div class="row-table">
+          <div><strong>Fabiola Cristi</strong><br><span class="mono">11.601.556-0</span></div>
+          <div class="mono">9 5759 2274</div>
+          <div class="mono">2151</div>
+          <div><button class="btn-call">📞 Llamar</button></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label>ISSABEL_PBX_HOST</label><div class="input">172.16.10.50</div></div>
+          <div class="field"><label>ISSABEL_PBX_AMI_PORT</label><div class="input">5038</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="corner">johnrivera7/filament-issabel-click-to-call · MIT</div>
+  </div>
+</body>
+</html>

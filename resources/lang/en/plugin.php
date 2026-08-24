@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'page_title' => 'Issabel Click-to-Call',
+    'section_ami' => 'Asterisk Manager (AMI)',
+    'section_ami_help' => 'Credentials for originate from your Laravel app to Issabel. Restrict the AMI user to your app server IP only.',
+    'enabled' => 'Enabled',
+    'host' => 'PBX host',
+    'port' => 'AMI port',
+    'username' => 'AMI username',
+    'secret' => 'AMI secret',
+    'channel_driver' => 'Channel driver',
+    'dial_context' => 'Dial context',
+    'dial_prefix' => 'Dial prefix (optional)',
+    'caller_id_name' => 'Caller ID name',
+    'default_extension' => 'Default extension',
+    'default_extension_help' => 'Optional fallback when actions do not resolve an extension per user.',
+    'save' => 'Save',
+    'saved_title' => 'AMI settings saved',
+    'action_call' => 'Call',
+    'not_configured_title' => 'Issabel not configured',
+    'not_configured_body' => 'Set ISSABEL_PBX_* in .env or configure AMI on the settings page.',
+    'no_extension_title' => 'No extension',
+    'no_extension_body' => 'Assign an Issabel extension (anexo) to this user or set a default extension.',
+    'call_started_title' => 'Calling…',
+    'call_started_body' => 'Answer your extension :extension. The system will dial :destination next.',
+    'call_failed_title' => 'Call failed',
+];

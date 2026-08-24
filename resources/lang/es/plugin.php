@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'page_title' => 'Issabel Click-to-Call',
+    'section_ami' => 'Asterisk Manager (AMI)',
+    'section_ami_help' => 'Credenciales para originar llamadas desde Laravel hacia Issabel. Restrinja el usuario AMI solo a la IP del servidor de la app.',
+    'enabled' => 'Activo',
+    'host' => 'Host PBX',
+    'port' => 'Puerto AMI',
+    'username' => 'Usuario AMI',
+    'secret' => 'Secret AMI',
+    'channel_driver' => 'Driver de canal',
+    'dial_context' => 'Contexto de marcado',
+    'dial_prefix' => 'Prefijo de marcado (opcional)',
+    'caller_id_name' => 'Nombre Caller ID',
+    'default_extension' => 'Anexo por defecto',
+    'default_extension_help' => 'Opcional si las acciones no resuelven anexo por usuario.',
+    'save' => 'Guardar',
+    'saved_title' => 'Configuración AMI guardada',
+    'action_call' => 'Llamar',
+    'not_configured_title' => 'Issabel no configurado',
+    'not_configured_body' => 'Configure ISSABEL_PBX_* en .env o la página de ajustes AMI.',
+    'no_extension_title' => 'Sin anexo',
+    'no_extension_body' => 'Asigne un anexo Issabel al usuario o configure un anexo por defecto.',
+    'call_started_title' => 'Llamando…',
+    'call_started_body' => 'Conteste su anexo :extension. Luego se marcará a :destination.',
+    'call_failed_title' => 'Error al llamar',
+];
