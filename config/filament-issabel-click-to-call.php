@@ -64,7 +64,7 @@ return [
     | - extension: agent anexo only
     | - custom: ISSABEL_PBX_CALLER_ID_NUMBER
     */
-    'caller_id_display' => env('ISSABEL_PBX_CALLER_ID_DISPLAY', 'agent_to_destination'),
+    'caller_id_display' => env('ISSABEL_PBX_CALLER_ID_DISPLAY', 'destination'),
 
     'caller_id_number' => env('ISSABEL_PBX_CALLER_ID_NUMBER'),
 

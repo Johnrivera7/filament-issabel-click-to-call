@@ -84,7 +84,8 @@ final class IssabelAmiGateway
             'CallerID: '.$callerId,
             'Async: true',
             'Timeout: 30000',
-            ...$this->originateVariables($extension, $destination),
+            'Variable: AMPUSER='.$extension,
+            'Variable: __ORIGinatingExtension='.$extension,
         ];
 
         if ($strategy === 'context_exten') {
@@ -95,32 +96,16 @@ final class IssabelAmiGateway
             return $lines;
         }
 
-        $timeout = (int) config('filament-issabel-click-to-call.dial_timeout_seconds', 300);
         $localChannel = sprintf(
-            'Local/%s@%s/n,%d,tTr',
+            'Local/%s@%s/n,30,tr',
             $destination,
             $this->credentials->dialContext,
-            $timeout,
         );
 
         $lines[] = 'Application: Dial';
         $lines[] = 'Data: '.$localChannel;
 
         return $lines;
-    }
-
-    /**
-     * @return list<string>
-     */
-    private function originateVariables(string $extension, string $destination): array
-    {
-        return [
-            'Variable: AMPUSER='.$extension,
-            'Variable: __OriginatingExtension='.$extension,
-            'Variable: REALCALLERIDNUM='.$extension,
-            'Variable: CALLERID(num)='.$extension,
-            'Variable: OUTBOUNDNUM='.$destination,
-        ];
     }
 
     /**
@@ -254,20 +239,18 @@ final class IssabelAmiGateway
         $localNumber = ChilePhoneNormalizer::normalize($callerIdNumber ?? $destination, withCountryCode: false)
             ?? $destination;
 
-        $formattedDestination = ChilePhoneNormalizer::formatLocalDisplay($localNumber) ?? $localNumber;
-
+        // Visor: solo el celular destino en el nombre; anexo en número (Issabel enruta bien así).
         $number = match ($mode) {
             'extension', 'agent_to_destination' => $extension,
             'custom' => $this->credentials->callerIdNumber ?: $extension,
-            'destination' => $localNumber,
-            default => $localNumber,
+            default => $extension,
         };
 
         $name = match ($mode) {
-            'agent_to_destination' => $callerIdName ?? sprintf('%s a %s', $extension, $formattedDestination),
-            'destination' => $callerIdName ?? $formattedDestination,
+            'destination' => $callerIdName ?? $localNumber,
             'extension' => $callerIdName ?? $extension,
-            default => $callerIdName ?? $this->credentials->callerIdName,
+            'agent_to_destination' => $callerIdName ?? $localNumber,
+            default => $callerIdName ?? $localNumber,
         };
 
         return sprintf('"%s" <%s>', str_replace('"', '', $name), $number);
