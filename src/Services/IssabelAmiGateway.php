@@ -50,6 +50,7 @@ final class IssabelAmiGateway
             extension: $extension,
             destination: $destination,
             callerId: $callerId,
+            displayNumber: ChilePhoneNormalizer::normalize($callerIdNumber ?? $destination, withCountryCode: false) ?? $destination,
         );
 
         $response = $this->sendAction($lines);
@@ -74,6 +75,7 @@ final class IssabelAmiGateway
         string $extension,
         string $destination,
         string $callerId,
+        string $displayNumber,
     ): array {
         $strategy = (string) config('filament-issabel-click-to-call.originate_strategy', 'application_dial');
 
@@ -86,6 +88,7 @@ final class IssabelAmiGateway
             'Timeout: 30000',
             'Variable: AMPUSER='.$extension,
             'Variable: __ORIGinatingExtension='.$extension,
+            ...$this->callerIdOverrideVariables($extension, $displayNumber),
         ];
 
         if ($strategy === 'context_exten') {
@@ -106,6 +109,28 @@ final class IssabelAmiGateway
         $lines[] = 'Data: '.$localChannel;
 
         return $lines;
+    }
+
+    /**
+     * Override Issabel/FreePBX extension CNAM (e.g. "Mariela Lopez") on the agent phone.
+     *
+     * @return list<string>
+     */
+    private function callerIdOverrideVariables(string $extension, string $displayNumber): array
+    {
+        $mode = $this->credentials->callerIdDisplay;
+
+        if (! in_array($mode, ['destination', 'agent_to_destination'], true)) {
+            return [];
+        }
+
+        return [
+            'Variable: CALLERID(name,i)='.$displayNumber,
+            'Variable: CALLERID(num,i)='.$displayNumber,
+            'Variable: CONNECTEDLINE(name,i)='.$displayNumber,
+            'Variable: CONNECTEDLINE(num,i)='.$displayNumber,
+            'Variable: REALCALLERIDNUM='.$extension,
+        ];
     }
 
     /**
@@ -239,17 +264,15 @@ final class IssabelAmiGateway
         $localNumber = ChilePhoneNormalizer::normalize($callerIdNumber ?? $destination, withCountryCode: false)
             ?? $destination;
 
-        // Visor: solo el celular destino en el nombre; anexo en número (Issabel enruta bien así).
+        // Visor: solo celular destino. Issabel suele pisar con CNAM del anexo si no forzamos (i).
         $number = match ($mode) {
-            'extension', 'agent_to_destination' => $extension,
+            'extension' => $extension,
             'custom' => $this->credentials->callerIdNumber ?: $extension,
-            default => $extension,
+            default => $localNumber,
         };
 
         $name = match ($mode) {
-            'destination' => $callerIdName ?? $localNumber,
             'extension' => $callerIdName ?? $extension,
-            'agent_to_destination' => $callerIdName ?? $localNumber,
             default => $callerIdName ?? $localNumber,
         };
 
