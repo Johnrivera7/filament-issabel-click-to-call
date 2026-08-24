@@ -19,10 +19,16 @@ class FilamentIssabelClickToCallServiceProvider extends PackageServiceProvider
             ->name(static::$name)
             ->hasConfigFile()
             ->hasViews()
-            ->hasTranslations()
-            ->publishes([
+            ->hasTranslations();
+    }
+
+    public function packageBooted(): void
+    {
+        if ($this->app->runningInConsole()) {
+            $this->publishes([
                 __DIR__.'/../resources/issabel/filament-click-to-call.conf' => resource_path('issabel/filament-click-to-call.conf'),
                 __DIR__.'/../docs/ISSABEL_VISOR_DESTINO.md' => base_path('docs/ISSABEL_VISOR_DESTINO.md'),
             ], 'filament-issabel-click-to-call-dialplan');
+        }
     }
 }
