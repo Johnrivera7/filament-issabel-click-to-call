@@ -41,27 +41,30 @@ return [
 
     /*
     | Outbound number format for Issabel dialplan:
-    | - local_9: 955170937 (typical Chile mobile from from-internal)
-    | - e164_cl: 56955170937 (if outbound routes require country code)
+    | - local_9: 955170937
+    | - outside_9: 9955170937 (prefix 9 for outside line — common in Chile PBX)
+    | - e164_cl: 56955170937
+    | - zero_nine: 0955170937
     */
     'dial_format' => env('ISSABEL_PBX_DIAL_FORMAT', 'local_9'),
 
     /*
     | AMI originate strategy:
-    | - context_exten: ring agent, then run {dial_context}/{number} — works on most Issabel
-    | - application_dial: ring agent, then Dial(Local/{number}@context)
+    | - application_dial: ring agent, then Dial(Local/{number}@context) — Issabel/FreePBX
+    | - context_exten: ring agent, then run {dial_context}/{number}
     */
-    'originate_strategy' => env('ISSABEL_PBX_ORIGINATE_STRATEGY', 'context_exten'),
+    'originate_strategy' => env('ISSABEL_PBX_ORIGINATE_STRATEGY', 'application_dial'),
 
     'caller_id_name' => env('ISSABEL_PBX_CALLER_ID_NAME', 'Filament Click-to-Call'),
 
     /*
-    | What the agent phone display shows when click-to-call rings the extension:
-    | - destination: customer phone (recommended)
-    | - extension: agent anexo
+    | Agent phone display when click-to-call rings the extension:
+    | - agent_to_destination: "2150 → 9 5517 0937" with anexo as number (recommended)
+    | - destination: customer phone on both lines (legacy)
+    | - extension: agent anexo only
     | - custom: ISSABEL_PBX_CALLER_ID_NUMBER
     */
-    'caller_id_display' => env('ISSABEL_PBX_CALLER_ID_DISPLAY', 'destination'),
+    'caller_id_display' => env('ISSABEL_PBX_CALLER_ID_DISPLAY', 'agent_to_destination'),
 
     'caller_id_number' => env('ISSABEL_PBX_CALLER_ID_NUMBER'),
 

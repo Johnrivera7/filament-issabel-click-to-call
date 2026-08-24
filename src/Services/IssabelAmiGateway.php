@@ -84,8 +84,7 @@ final class IssabelAmiGateway
             'CallerID: '.$callerId,
             'Async: true',
             'Timeout: 30000',
-            'Variable: AMPUSER='.$extension,
-            'Variable: __ORIGinatingExtension='.$extension,
+            ...$this->originateVariables($extension, $destination),
         ];
 
         if ($strategy === 'context_exten') {
@@ -96,17 +95,32 @@ final class IssabelAmiGateway
             return $lines;
         }
 
-        // Issabel / FreePBX: when the agent answers, bridge to outbound via Local channel.
+        $timeout = (int) config('filament-issabel-click-to-call.dial_timeout_seconds', 300);
         $localChannel = sprintf(
-            'Local/%s@%s/n,30,tr',
+            'Local/%s@%s/n,%d,tTr',
             $destination,
             $this->credentials->dialContext,
+            $timeout,
         );
 
         $lines[] = 'Application: Dial';
         $lines[] = 'Data: '.$localChannel;
 
         return $lines;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function originateVariables(string $extension, string $destination): array
+    {
+        return [
+            'Variable: AMPUSER='.$extension,
+            'Variable: __OriginatingExtension='.$extension,
+            'Variable: REALCALLERIDNUM='.$extension,
+            'Variable: CALLERID(num)='.$extension,
+            'Variable: OUTBOUNDNUM='.$destination,
+        ];
     }
 
     /**
@@ -240,16 +254,18 @@ final class IssabelAmiGateway
         $localNumber = ChilePhoneNormalizer::normalize($callerIdNumber ?? $destination, withCountryCode: false)
             ?? $destination;
 
+        $formattedDestination = ChilePhoneNormalizer::formatLocalDisplay($localNumber) ?? $localNumber;
+
         $number = match ($mode) {
             'extension' => $extension,
             'custom' => $this->credentials->callerIdNumber ?: $extension,
-            default => $localNumber,
+            'destination' => $localNumber,
+            default => $extension,
         };
 
         $name = match ($mode) {
-            'destination' => $callerIdName
-                ?? ChilePhoneNormalizer::formatLocalDisplay($localNumber)
-                ?? $localNumber,
+            'agent_to_destination' => $callerIdName ?? sprintf('%s → %s', $extension, $formattedDestination),
+            'destination' => $callerIdName ?? $formattedDestination,
             default => $callerIdName ?? $this->credentials->callerIdName,
         };
 

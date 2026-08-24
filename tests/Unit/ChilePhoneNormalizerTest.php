@@ -34,5 +34,6 @@ final class ChilePhoneNormalizerTest extends TestCase
     {
         $this->assertSame('56955170937', ChilePhoneNormalizer::forDial('+56955170937', 'e164_cl'));
         $this->assertSame('955170937', ChilePhoneNormalizer::forDial('+56955170937', 'local_9'));
+        $this->assertSame('9955170937', ChilePhoneNormalizer::forDial('+56955170937', 'outside_9'));
     }
 }

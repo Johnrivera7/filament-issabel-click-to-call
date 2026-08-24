@@ -78,6 +78,12 @@ final class ChilePhoneNormalizer
 
         return match ($format) {
             'e164_cl' => '56'.$local,
+            'outside_9' => str_starts_with($local, '9') && strlen($local) === 9
+                ? '9'.$local
+                : $local,
+            'zero_nine' => str_starts_with($local, '9') && strlen($local) === 9
+                ? '0'.$local
+                : $local,
             default => $local,
         };
     }
