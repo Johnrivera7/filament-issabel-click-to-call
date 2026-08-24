@@ -237,16 +237,19 @@ final class IssabelAmiGateway
     ): string {
         $mode = $this->credentials->callerIdDisplay;
 
+        $localNumber = ChilePhoneNormalizer::normalize($callerIdNumber ?? $destination, withCountryCode: false)
+            ?? $destination;
+
         $number = match ($mode) {
             'extension' => $extension,
             'custom' => $this->credentials->callerIdNumber ?: $extension,
-            default => $callerIdNumber ?? $destination,
+            default => $localNumber,
         };
 
         $name = match ($mode) {
             'destination' => $callerIdName
-                ?? ChilePhoneNormalizer::formatForDisplay($number)
-                ?? $number,
+                ?? ChilePhoneNormalizer::formatLocalDisplay($localNumber)
+                ?? $localNumber,
             default => $callerIdName ?? $this->credentials->callerIdName,
         };
 

@@ -37,20 +37,25 @@ final class ClickToCallService
             throw new RuntimeException('Extension (anexo) is required for click-to-call.');
         }
 
-        $destination = ChilePhoneNormalizer::normalize($phone, withCountryCode: false);
+        $dialFormat = (string) config('filament-issabel-click-to-call.dial_format', 'local_9');
+
+        $localNumber = ChilePhoneNormalizer::normalize($phone, withCountryCode: false);
+        if ($localNumber === null) {
+            throw new RuntimeException('Invalid or empty phone number.');
+        }
+
+        $destination = ChilePhoneNormalizer::forDial($phone, $dialFormat);
         if ($destination === null) {
             throw new RuntimeException('Invalid or empty phone number.');
         }
 
         $destination = $credentials->dialPrefix.$destination;
 
-        $callerIdNumber = ChilePhoneNormalizer::normalize($phone, withCountryCode: true) ?? $destination;
-
         $actionId = $this->gateway->originate(
             extension: $extension,
             destination: $destination,
             callerIdName: $callerIdName,
-            callerIdNumber: $callerIdNumber,
+            callerIdNumber: $localNumber,
         );
 
         return [

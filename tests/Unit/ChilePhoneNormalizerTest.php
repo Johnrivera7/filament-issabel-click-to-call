@@ -27,6 +27,12 @@ final class ChilePhoneNormalizerTest extends TestCase
 
     public function test_formats_chile_mobile_for_display(): void
     {
-        $this->assertSame('+56 9 5517 0937', ChilePhoneNormalizer::formatForDisplay('+56955170937'));
+        $this->assertSame('9 5517 0937', ChilePhoneNormalizer::formatLocalDisplay('+56955170937'));
+    }
+
+    public function test_for_dial_e164_cl(): void
+    {
+        $this->assertSame('56955170937', ChilePhoneNormalizer::forDial('+56955170937', 'e164_cl'));
+        $this->assertSame('955170937', ChilePhoneNormalizer::forDial('+56955170937', 'local_9'));
     }
 }

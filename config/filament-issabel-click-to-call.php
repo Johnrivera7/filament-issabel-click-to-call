@@ -40,11 +40,18 @@ return [
     'dial_prefix' => env('ISSABEL_PBX_DIAL_PREFIX', ''),
 
     /*
-    | AMI originate strategy:
-    | - application_dial: ring agent, then Dial(Local/{number}@context) — recommended for Issabel/FreePBX
-    | - context_exten: ring agent, then run context/exten on answer (legacy)
+    | Outbound number format for Issabel dialplan:
+    | - local_9: 955170937 (typical Chile mobile from from-internal)
+    | - e164_cl: 56955170937 (if outbound routes require country code)
     */
-    'originate_strategy' => env('ISSABEL_PBX_ORIGINATE_STRATEGY', 'application_dial'),
+    'dial_format' => env('ISSABEL_PBX_DIAL_FORMAT', 'local_9'),
+
+    /*
+    | AMI originate strategy:
+    | - context_exten: ring agent, then run {dial_context}/{number} — works on most Issabel
+    | - application_dial: ring agent, then Dial(Local/{number}@context)
+    */
+    'originate_strategy' => env('ISSABEL_PBX_ORIGINATE_STRATEGY', 'context_exten'),
 
     'caller_id_name' => env('ISSABEL_PBX_CALLER_ID_NAME', 'Filament Click-to-Call'),
 

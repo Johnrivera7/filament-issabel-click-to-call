@@ -41,17 +41,44 @@ final class ChilePhoneNormalizer
         return null;
     }
 
-    public static function formatForDisplay(?string $phone): ?string
+    /**
+     * Chile mobile display for agent phone (local 9-digit, no country code).
+     */
+    public static function formatLocalDisplay(?string $phone): ?string
     {
-        $digits = self::normalize($phone, withCountryCode: true);
-        if ($digits === null) {
+        $local = self::normalize($phone, withCountryCode: false);
+        if ($local === null) {
             return null;
         }
 
-        if (strlen($digits) === 11 && str_starts_with($digits, '569')) {
-            return '+56 9 '.substr($digits, 3, 4).' '.substr($digits, 7);
+        if (strlen($local) === 9 && str_starts_with($local, '9')) {
+            return '9 '.substr($local, 1, 4).' '.substr($local, 5);
         }
 
-        return $digits;
+        return $local;
+    }
+
+    /**
+     * @deprecated Use formatLocalDisplay() for agent CallerID.
+     */
+    public static function formatForDisplay(?string $phone): ?string
+    {
+        return self::formatLocalDisplay($phone);
+    }
+
+    /**
+     * Number sent to Issabel dialplan (before optional dial_prefix).
+     */
+    public static function forDial(?string $phone, string $format = 'local_9'): ?string
+    {
+        $local = self::normalize($phone, withCountryCode: false);
+        if ($local === null) {
+            return null;
+        }
+
+        return match ($format) {
+            'e164_cl' => '56'.$local,
+            default => $local,
+        };
     }
 }
