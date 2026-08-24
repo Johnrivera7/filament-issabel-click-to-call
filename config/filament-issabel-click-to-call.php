@@ -39,6 +39,13 @@ return [
     */
     'dial_prefix' => env('ISSABEL_PBX_DIAL_PREFIX', ''),
 
+    /*
+    | AMI originate strategy:
+    | - application_dial: ring agent, then Dial(Local/{number}@context) — recommended for Issabel/FreePBX
+    | - context_exten: ring agent, then run context/exten on answer (legacy)
+    */
+    'originate_strategy' => env('ISSABEL_PBX_ORIGINATE_STRATEGY', 'application_dial'),
+
     'caller_id_name' => env('ISSABEL_PBX_CALLER_ID_NAME', 'Filament Click-to-Call'),
 
     /*
