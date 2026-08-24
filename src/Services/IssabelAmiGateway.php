@@ -86,8 +86,7 @@ final class IssabelAmiGateway
             'CallerID: '.$callerId,
             'Async: true',
             'Timeout: 30000',
-            'Variable: AMPUSER='.$extension,
-            'Variable: __ORIGinatingExtension='.$extension,
+            ...$this->originateVariables($extension, $destination),
             ...$this->callerIdOverrideVariables($extension, $displayNumber),
         ];
 
@@ -112,7 +111,24 @@ final class IssabelAmiGateway
     }
 
     /**
+     * FreePBX/Issabel routing vars — OUTBOUNDNUM is the dialed destination.
+     *
+     * @return list<string>
+     */
+    private function originateVariables(string $extension, string $destination): array
+    {
+        return [
+            'Variable: AMPUSER='.$extension,
+            'Variable: __OriginatingExtension='.$extension,
+            'Variable: REALCALLERIDNUM='.$extension,
+            'Variable: CALLERID(num)='.$extension,
+            'Variable: OUTBOUNDNUM='.$destination,
+        ];
+    }
+
+    /**
      * Override Issabel/FreePBX extension CNAM (e.g. "Mariela Lopez") on the agent phone.
+     * Only touch display name — never (i)-override num or Issabel dials the wrong party.
      *
      * @return list<string>
      */
@@ -126,10 +142,7 @@ final class IssabelAmiGateway
 
         return [
             'Variable: CALLERID(name,i)='.$displayNumber,
-            'Variable: CALLERID(num,i)='.$extension,
             'Variable: CONNECTEDLINE(name,i)='.$displayNumber,
-            'Variable: CONNECTEDLINE(num,i)='.$extension,
-            'Variable: REALCALLERIDNUM='.$extension,
         ];
     }
 
@@ -264,16 +277,20 @@ final class IssabelAmiGateway
         $localNumber = ChilePhoneNormalizer::normalize($callerIdNumber ?? $destination, withCountryCode: false)
             ?? $destination;
 
-        // Visor: celular en nombre; anexo en número (Issabel enruta la salida por anexo).
+        $formattedDestination = ChilePhoneNormalizer::formatLocalDisplay($localNumber) ?? $localNumber;
+
+        // Header CallerID for agent display; routing uses OUTBOUNDNUM + CALLERID(num)=anexo.
         $number = match ($mode) {
-            'extension' => $extension,
+            'extension', 'agent_to_destination' => $extension,
             'custom' => $this->credentials->callerIdNumber ?: $extension,
-            default => $extension,
+            default => $localNumber,
         };
 
         $name = match ($mode) {
+            'agent_to_destination' => $callerIdName ?? sprintf('%s → %s', $extension, $formattedDestination),
+            'destination' => $callerIdName ?? $formattedDestination,
             'extension' => $callerIdName ?? $extension,
-            default => $callerIdName ?? $localNumber,
+            default => $callerIdName ?? $this->credentials->callerIdName,
         };
 
         return sprintf('"%s" <%s>', str_replace('"', '', $name), $number);
