@@ -257,15 +257,14 @@ final class IssabelAmiGateway
         $formattedDestination = ChilePhoneNormalizer::formatLocalDisplay($localNumber) ?? $localNumber;
 
         $number = match ($mode) {
-            'extension' => $extension,
+            'extension', 'agent_to_destination' => $extension,
             'custom' => $this->credentials->callerIdNumber ?: $extension,
             'destination' => $localNumber,
-            'agent_to_destination' => $localNumber,
             default => $localNumber,
         };
 
         $name = match ($mode) {
-            'agent_to_destination' => $callerIdName ?? sprintf('%s → %s', $extension, $formattedDestination),
+            'agent_to_destination' => $callerIdName ?? sprintf('%s a %s', $extension, $formattedDestination),
             'destination' => $callerIdName ?? $formattedDestination,
             'extension' => $callerIdName ?? $extension,
             default => $callerIdName ?? $this->credentials->callerIdName,
