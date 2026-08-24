@@ -40,13 +40,12 @@ final class IssabelAmiGateway
         $this->connect();
         $this->login();
 
-        $strategy = (string) config('filament-issabel-click-to-call.originate_strategy', 'local_agent');
+        $strategy = (string) config('filament-issabel-click-to-call.originate_strategy', 'application_dial');
         $callerId = $this->buildCallerId(
             extension: $extension,
             destination: $destination,
             callerIdName: $callerIdName,
             callerIdNumber: $callerIdNumber,
-            strategy: $strategy,
         );
         $actionId = 'ctc-'.bin2hex(random_bytes(8));
         $channel = $this->buildAgentChannel($extension, $strategy);
@@ -141,6 +140,8 @@ final class IssabelAmiGateway
     }
 
     /**
+     * Visor del anexo: celular destino. Sin flag (i) para no heredar al canal Local de salida.
+     *
      * @return list<string>
      */
     private function callerIdOverrideVariables(string $displayNumber): array
@@ -154,8 +155,12 @@ final class IssabelAmiGateway
         $formatted = ChilePhoneNormalizer::formatLocalDisplay($displayNumber) ?? $displayNumber;
 
         return [
-            'Variable: CALLERID(name,i)='.$formatted,
-            'Variable: CONNECTEDLINE(name,i)='.$formatted,
+            'Variable: CALLERID(all)="'.$formatted.'" <'.$displayNumber.'>',
+            'Variable: CALLERID(name)='.$formatted,
+            'Variable: CALLERID(num)='.$displayNumber,
+            'Variable: CONNECTEDLINE(all)="'.$formatted.'" <'.$displayNumber.'>',
+            'Variable: CONNECTEDLINE(name)='.$formatted,
+            'Variable: CONNECTEDLINE(num)='.$displayNumber,
         ];
     }
 
@@ -284,7 +289,6 @@ final class IssabelAmiGateway
         string $destination,
         ?string $callerIdName,
         ?string $callerIdNumber,
-        string $strategy,
     ): string {
         $mode = $this->credentials->callerIdDisplay;
 
@@ -293,12 +297,11 @@ final class IssabelAmiGateway
 
         $formattedDestination = ChilePhoneNormalizer::formatLocalDisplay($localNumber) ?? $localNumber;
 
-        // local_agent: Exten carries the dial target — CallerID can show the cell on the visor.
-        $number = match (true) {
-            $strategy === 'local_agent' && in_array($mode, ['destination', 'agent_to_destination'], true) => $localNumber,
-            $mode === 'extension', $mode === 'agent_to_destination' => $extension,
-            $mode === 'custom' => $this->credentials->callerIdNumber ?: $extension,
-            default => $extension,
+        // Visor: celular. El marcado saliente usa Local/{destino}@context (application_dial) o Exten.
+        $number = match ($mode) {
+            'extension' => $extension,
+            'custom' => $this->credentials->callerIdNumber ?: $extension,
+            default => $localNumber,
         };
 
         $name = match ($mode) {
