@@ -49,11 +49,17 @@ return [
     'dial_format' => env('ISSABEL_PBX_DIAL_FORMAT', 'local_9'),
 
     /*
-    | AMI originate strategy:
-    | - application_dial: ring agent, then Dial(Local/{number}@context) — Issabel/FreePBX
-    | - context_exten: ring agent, then run {dial_context}/{number}
+    | Context for the agent leg (FreePBX/Issabel skips voicemail on no-answer).
     */
-    'originate_strategy' => env('ISSABEL_PBX_ORIGINATE_STRATEGY', 'application_dial'),
+    'agent_context' => env('ISSABEL_PBX_AGENT_CONTEXT', 'originate-skipvm'),
+
+    /*
+    | AMI originate strategy:
+    | - local_agent: Local/{anexo}@agent_context → from-internal/{destino} (FreePBX standard)
+    | - application_dial: SIP/{anexo} + Dial(Local/{destino}@context) — legacy fallback
+    | - context_exten: SIP/{anexo} → {dial_context}/{destino}
+    */
+    'originate_strategy' => env('ISSABEL_PBX_ORIGINATE_STRATEGY', 'local_agent'),
 
     'caller_id_name' => env('ISSABEL_PBX_CALLER_ID_NAME', 'Filament Click-to-Call'),
 

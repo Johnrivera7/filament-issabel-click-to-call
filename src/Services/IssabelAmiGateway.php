@@ -40,9 +40,17 @@ final class IssabelAmiGateway
         $this->connect();
         $this->login();
 
-        $channel = sprintf('%s/%s', $this->credentials->channelDriver, $extension);
-        $callerId = $this->buildCallerId($extension, $destination, $callerIdName, $callerIdNumber);
+        $strategy = (string) config('filament-issabel-click-to-call.originate_strategy', 'local_agent');
+        $callerId = $this->buildCallerId(
+            extension: $extension,
+            destination: $destination,
+            callerIdName: $callerIdName,
+            callerIdNumber: $callerIdNumber,
+            strategy: $strategy,
+        );
         $actionId = 'ctc-'.bin2hex(random_bytes(8));
+        $channel = $this->buildAgentChannel($extension, $strategy);
+        $displayNumber = ChilePhoneNormalizer::normalize($callerIdNumber ?? $destination, withCountryCode: false) ?? $destination;
 
         $lines = $this->buildOriginateLines(
             actionId: $actionId,
@@ -50,7 +58,8 @@ final class IssabelAmiGateway
             extension: $extension,
             destination: $destination,
             callerId: $callerId,
-            displayNumber: ChilePhoneNormalizer::normalize($callerIdNumber ?? $destination, withCountryCode: false) ?? $destination,
+            displayNumber: $displayNumber,
+            strategy: $strategy,
         );
 
         $response = $this->sendAction($lines);
@@ -66,6 +75,17 @@ final class IssabelAmiGateway
         return $actionId;
     }
 
+    private function buildAgentChannel(string $extension, string $strategy): string
+    {
+        if ($strategy === 'local_agent') {
+            $agentContext = (string) config('filament-issabel-click-to-call.agent_context', 'originate-skipvm');
+
+            return sprintf('Local/%s@%s', $extension, $agentContext);
+        }
+
+        return sprintf('%s/%s', $this->credentials->channelDriver, $extension);
+    }
+
     /**
      * @return list<string>
      */
@@ -76,9 +96,8 @@ final class IssabelAmiGateway
         string $destination,
         string $callerId,
         string $displayNumber,
+        string $strategy,
     ): array {
-        $strategy = (string) config('filament-issabel-click-to-call.originate_strategy', 'application_dial');
-
         $lines = [
             'Action: Originate',
             'ActionID: '.$actionId,
@@ -86,11 +105,11 @@ final class IssabelAmiGateway
             'CallerID: '.$callerId,
             'Async: true',
             'Timeout: 30000',
-            ...$this->originateVariables($extension, $destination),
-            ...$this->callerIdOverrideVariables($extension, $displayNumber),
+            ...$this->originateVariables($extension, $destination, $strategy),
+            ...$this->callerIdOverrideVariables($displayNumber),
         ];
 
-        if ($strategy === 'context_exten') {
+        if ($strategy === 'local_agent' || $strategy === 'context_exten') {
             $lines[] = 'Context: '.$this->credentials->dialContext;
             $lines[] = 'Exten: '.$destination;
             $lines[] = 'Priority: 1';
@@ -111,28 +130,30 @@ final class IssabelAmiGateway
     }
 
     /**
-     * FreePBX/Issabel routing vars — OUTBOUNDNUM is the dialed destination.
-     *
      * @return list<string>
      */
-    private function originateVariables(string $extension, string $destination): array
+    private function originateVariables(string $extension, string $destination, string $strategy): array
     {
-        return [
+        $base = [
             'Variable: AMPUSER='.$extension,
             'Variable: __OriginatingExtension='.$extension,
+        ];
+
+        if ($strategy !== 'application_dial') {
+            return $base;
+        }
+
+        return [
+            ...$base,
             'Variable: REALCALLERIDNUM='.$extension,
             'Variable: CALLERID(num)='.$extension,
-            'Variable: OUTBOUNDNUM='.$destination,
         ];
     }
 
     /**
-     * Override Issabel/FreePBX extension CNAM (e.g. "Mariela Lopez") on the agent phone.
-     * Only touch display name — never (i)-override num or Issabel dials the wrong party.
-     *
      * @return list<string>
      */
-    private function callerIdOverrideVariables(string $extension, string $displayNumber): array
+    private function callerIdOverrideVariables(string $displayNumber): array
     {
         $mode = $this->credentials->callerIdDisplay;
 
@@ -140,9 +161,11 @@ final class IssabelAmiGateway
             return [];
         }
 
+        $formatted = ChilePhoneNormalizer::formatLocalDisplay($displayNumber) ?? $displayNumber;
+
         return [
-            'Variable: CALLERID(name,i)='.$displayNumber,
-            'Variable: CONNECTEDLINE(name,i)='.$displayNumber,
+            'Variable: CALLERID(name,i)='.$formatted,
+            'Variable: CONNECTEDLINE(name,i)='.$formatted,
         ];
     }
 
@@ -271,6 +294,7 @@ final class IssabelAmiGateway
         string $destination,
         ?string $callerIdName,
         ?string $callerIdNumber,
+        string $strategy,
     ): string {
         $mode = $this->credentials->callerIdDisplay;
 
@@ -279,11 +303,12 @@ final class IssabelAmiGateway
 
         $formattedDestination = ChilePhoneNormalizer::formatLocalDisplay($localNumber) ?? $localNumber;
 
-        // Header CallerID for agent display; routing uses OUTBOUNDNUM + CALLERID(num)=anexo.
-        $number = match ($mode) {
-            'extension', 'agent_to_destination' => $extension,
-            'custom' => $this->credentials->callerIdNumber ?: $extension,
-            default => $localNumber,
+        // local_agent: Exten carries the dial target — CallerID can show the cell on the visor.
+        $number = match (true) {
+            $strategy === 'local_agent' && in_array($mode, ['destination', 'agent_to_destination'], true) => $localNumber,
+            $mode === 'extension', $mode === 'agent_to_destination' => $extension,
+            $mode === 'custom' => $this->credentials->callerIdNumber ?: $extension,
+            default => $extension,
         };
 
         $name = match ($mode) {
