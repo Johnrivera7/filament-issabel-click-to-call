@@ -44,17 +44,13 @@ final class IssabelAmiGateway
         $callerId = $this->buildCallerId($extension, $destination, $callerIdName, $callerIdNumber);
         $actionId = 'ctc-'.bin2hex(random_bytes(8));
 
-        $lines = [
-            'Action: Originate',
-            'ActionID: '.$actionId,
-            'Channel: '.$channel,
-            'Context: '.$this->credentials->dialContext,
-            'Exten: '.$destination,
-            'Priority: 1',
-            'CallerID: '.$callerId,
-            'Async: true',
-            'Timeout: 30000',
-        ];
+        $lines = $this->buildOriginateLines(
+            actionId: $actionId,
+            channel: $channel,
+            extension: $extension,
+            destination: $destination,
+            callerId: $callerId,
+        );
 
         $response = $this->sendAction($lines);
         $this->logout();
@@ -67,6 +63,50 @@ final class IssabelAmiGateway
         }
 
         return $actionId;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function buildOriginateLines(
+        string $actionId,
+        string $channel,
+        string $extension,
+        string $destination,
+        string $callerId,
+    ): array {
+        $strategy = (string) config('filament-issabel-click-to-call.originate_strategy', 'application_dial');
+
+        $lines = [
+            'Action: Originate',
+            'ActionID: '.$actionId,
+            'Channel: '.$channel,
+            'CallerID: '.$callerId,
+            'Async: true',
+            'Timeout: 30000',
+            'Variable: AMPUSER='.$extension,
+            'Variable: __ORIGinatingExtension='.$extension,
+        ];
+
+        if ($strategy === 'context_exten') {
+            $lines[] = 'Context: '.$this->credentials->dialContext;
+            $lines[] = 'Exten: '.$destination;
+            $lines[] = 'Priority: 1';
+
+            return $lines;
+        }
+
+        // Issabel / FreePBX: when the agent answers, bridge to outbound via Local channel.
+        $localChannel = sprintf(
+            'Local/%s@%s/n,30,tr',
+            $destination,
+            $this->credentials->dialContext,
+        );
+
+        $lines[] = 'Application: Dial';
+        $lines[] = 'Data: '.$localChannel;
+
+        return $lines;
     }
 
     /**
