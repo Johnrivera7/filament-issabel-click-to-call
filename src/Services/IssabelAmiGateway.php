@@ -140,7 +140,8 @@ final class IssabelAmiGateway
     }
 
     /**
-     * Visor del anexo: celular destino. Sin flag (i) para no heredar al canal Local de salida.
+     * Visor del anexo: solo el nombre (celular formateado). Nunca tocar CALLERID(num):
+     * FreePBX enruta la salida por anexo; si num=celular va a bad-number ("número equivocado").
      *
      * @return list<string>
      */
@@ -155,12 +156,8 @@ final class IssabelAmiGateway
         $formatted = ChilePhoneNormalizer::formatLocalDisplay($displayNumber) ?? $displayNumber;
 
         return [
-            'Variable: CALLERID(all)="'.$formatted.'" <'.$displayNumber.'>',
             'Variable: CALLERID(name)='.$formatted,
-            'Variable: CALLERID(num)='.$displayNumber,
-            'Variable: CONNECTEDLINE(all)="'.$formatted.'" <'.$displayNumber.'>',
             'Variable: CONNECTEDLINE(name)='.$formatted,
-            'Variable: CONNECTEDLINE(num)='.$displayNumber,
         ];
     }
 
@@ -297,11 +294,11 @@ final class IssabelAmiGateway
 
         $formattedDestination = ChilePhoneNormalizer::formatLocalDisplay($localNumber) ?? $localNumber;
 
-        // Visor: celular. El marcado saliente usa Local/{destino}@context (application_dial) o Exten.
+        // FreePBX: num=anexo para enrutar; nombre=celular para el visor del ejecutivo.
         $number = match ($mode) {
             'extension' => $extension,
             'custom' => $this->credentials->callerIdNumber ?: $extension,
-            default => $localNumber,
+            default => $extension,
         };
 
         $name = match ($mode) {
