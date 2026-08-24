@@ -165,7 +165,7 @@ This plugin uses **AMI** because it is stable, works on stock Issabel, and match
 ## Installation
 
 ```bash
-composer require johnrivera7/filament-issabel-click-to-call
+composer require johnrivera7/filament-issabel-click-to-call:^1.0
 ```
 
 ```bash
