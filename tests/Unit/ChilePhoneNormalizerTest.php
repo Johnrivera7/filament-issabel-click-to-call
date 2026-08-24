@@ -24,4 +24,9 @@ final class ChilePhoneNormalizerTest extends TestCase
         $this->assertNull(ChilePhoneNormalizer::normalize(''));
         $this->assertNull(ChilePhoneNormalizer::normalize(null));
     }
+
+    public function test_formats_chile_mobile_for_display(): void
+    {
+        $this->assertSame('+56 9 5517 0937', ChilePhoneNormalizer::formatForDisplay('+56955170937'));
+    }
 }

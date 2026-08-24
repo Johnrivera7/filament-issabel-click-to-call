@@ -40,4 +40,18 @@ final class ChilePhoneNormalizer
 
         return null;
     }
+
+    public static function formatForDisplay(?string $phone): ?string
+    {
+        $digits = self::normalize($phone, withCountryCode: true);
+        if ($digits === null) {
+            return null;
+        }
+
+        if (strlen($digits) === 11 && str_starts_with($digits, '569')) {
+            return '+56 9 '.substr($digits, 3, 4).' '.substr($digits, 7);
+        }
+
+        return $digits;
+    }
 }

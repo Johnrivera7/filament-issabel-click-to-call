@@ -44,10 +44,13 @@ final class ClickToCallService
 
         $destination = $credentials->dialPrefix.$destination;
 
+        $callerIdNumber = ChilePhoneNormalizer::normalize($phone, withCountryCode: true) ?? $destination;
+
         $actionId = $this->gateway->originate(
             extension: $extension,
             destination: $destination,
-            callerIdName: $callerIdName ?? $credentials->callerIdName,
+            callerIdName: $callerIdName,
+            callerIdNumber: $callerIdNumber,
         );
 
         return [

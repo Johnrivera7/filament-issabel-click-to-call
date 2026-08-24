@@ -18,6 +18,8 @@ final class IssabelAmiCredentials
         public string $dialContext,
         public string $dialPrefix,
         public string $callerIdName,
+        public string $callerIdDisplay,
+        public ?string $callerIdNumber,
         public ?string $defaultExtension,
     ) {}
 
@@ -35,6 +37,10 @@ final class IssabelAmiCredentials
             dialContext: (string) config('filament-issabel-click-to-call.dial_context', 'from-internal'),
             dialPrefix: (string) config('filament-issabel-click-to-call.dial_prefix', ''),
             callerIdName: (string) config('filament-issabel-click-to-call.caller_id_name', 'Filament Click-to-Call'),
+            callerIdDisplay: (string) config('filament-issabel-click-to-call.caller_id_display', 'destination'),
+            callerIdNumber: filled(config('filament-issabel-click-to-call.caller_id_number'))
+                ? (string) config('filament-issabel-click-to-call.caller_id_number')
+                : null,
             defaultExtension: filled(config('filament-issabel-click-to-call.default_extension'))
                 ? (string) config('filament-issabel-click-to-call.default_extension')
                 : null,
@@ -58,6 +64,10 @@ final class IssabelAmiCredentials
             dialContext: (string) ($data['dial_context'] ?? 'from-internal'),
             dialPrefix: (string) ($data['dial_prefix'] ?? ''),
             callerIdName: (string) ($data['caller_id_name'] ?? 'Filament Click-to-Call'),
+            callerIdDisplay: (string) ($data['caller_id_display'] ?? 'destination'),
+            callerIdNumber: filled($data['caller_id_number'] ?? null)
+                ? (string) $data['caller_id_number']
+                : null,
             defaultExtension: filled($data['default_extension'] ?? null)
                 ? (string) $data['default_extension']
                 : null,
@@ -81,6 +91,8 @@ final class IssabelAmiCredentials
             'dial_context' => $this->dialContext,
             'dial_prefix' => $this->dialPrefix,
             'caller_id_name' => $this->callerIdName,
+            'caller_id_display' => $this->callerIdDisplay,
+            'caller_id_number' => $this->callerIdNumber,
             'default_extension' => $this->defaultExtension,
         ];
     }

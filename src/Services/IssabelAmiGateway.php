@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace JohnRivera7\FilamentIssabelClickToCall\Services;
 
+use JohnRivera7\FilamentIssabelClickToCall\Support\ChilePhoneNormalizer;
 use JohnRivera7\FilamentIssabelClickToCall\Support\IssabelAmiCredentials;
 use RuntimeException;
 
@@ -26,8 +27,12 @@ final class IssabelAmiGateway
         return $this->credentials;
     }
 
-    public function originate(string $extension, string $destination, ?string $callerIdName = null): ?string
-    {
+    public function originate(
+        string $extension,
+        string $destination,
+        ?string $callerIdName = null,
+        ?string $callerIdNumber = null,
+    ): ?string {
         if (! $this->credentials->isConfigured()) {
             throw new RuntimeException('Issabel AMI credentials are incomplete.');
         }
@@ -36,16 +41,20 @@ final class IssabelAmiGateway
         $this->login();
 
         $channel = sprintf('%s/%s', $this->credentials->channelDriver, $extension);
-        $callerId = sprintf('"%s" <%s>', str_replace('"', '', $callerIdName ?? $this->credentials->callerIdName), $extension);
+        $callerId = $this->buildCallerId($extension, $destination, $callerIdName, $callerIdNumber);
         $actionId = 'ctc-'.bin2hex(random_bytes(8));
 
-        $lines = $this->buildOriginateLines(
-            actionId: $actionId,
-            channel: $channel,
-            extension: $extension,
-            destination: $destination,
-            callerId: $callerId,
-        );
+        $lines = [
+            'Action: Originate',
+            'ActionID: '.$actionId,
+            'Channel: '.$channel,
+            'Context: '.$this->credentials->dialContext,
+            'Exten: '.$destination,
+            'Priority: 1',
+            'CallerID: '.$callerId,
+            'Async: true',
+            'Timeout: 30000',
+        ];
 
         $response = $this->sendAction($lines);
         $this->logout();
@@ -58,50 +67,6 @@ final class IssabelAmiGateway
         }
 
         return $actionId;
-    }
-
-    /**
-     * @return list<string>
-     */
-    private function buildOriginateLines(
-        string $actionId,
-        string $channel,
-        string $extension,
-        string $destination,
-        string $callerId,
-    ): array {
-        $strategy = (string) config('filament-issabel-click-to-call.originate_strategy', 'application_dial');
-
-        $lines = [
-            'Action: Originate',
-            'ActionID: '.$actionId,
-            'Channel: '.$channel,
-            'CallerID: '.$callerId,
-            'Async: true',
-            'Timeout: 30000',
-            'Variable: AMPUSER='.$extension,
-            'Variable: __ORIGinatingExtension='.$extension,
-        ];
-
-        if ($strategy === 'context_exten') {
-            $lines[] = 'Context: '.$this->credentials->dialContext;
-            $lines[] = 'Exten: '.$destination;
-            $lines[] = 'Priority: 1';
-
-            return $lines;
-        }
-
-        // Issabel / FreePBX: when the agent answers, bridge to outbound via Local channel.
-        $localChannel = sprintf(
-            'Local/%s@%s/n,30,tr',
-            $destination,
-            $this->credentials->dialContext,
-        );
-
-        $lines[] = 'Application: Dial';
-        $lines[] = 'Data: '.$localChannel;
-
-        return $lines;
     }
 
     /**
@@ -222,5 +187,29 @@ final class IssabelAmiGateway
         }
 
         return $out;
+    }
+
+    private function buildCallerId(
+        string $extension,
+        string $destination,
+        ?string $callerIdName,
+        ?string $callerIdNumber,
+    ): string {
+        $mode = $this->credentials->callerIdDisplay;
+
+        $number = match ($mode) {
+            'extension' => $extension,
+            'custom' => $this->credentials->callerIdNumber ?: $extension,
+            default => $callerIdNumber ?? $destination,
+        };
+
+        $name = match ($mode) {
+            'destination' => $callerIdName
+                ?? ChilePhoneNormalizer::formatForDisplay($number)
+                ?? $number,
+            default => $callerIdName ?? $this->credentials->callerIdName,
+        };
+
+        return sprintf('"%s" <%s>', str_replace('"', '', $name), $number);
     }
 }
