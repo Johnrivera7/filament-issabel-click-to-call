@@ -40,16 +40,17 @@ final class IssabelAmiGateway
         $this->connect();
         $this->login();
 
-        $strategy = (string) config('filament-issabel-click-to-call.originate_strategy', 'application_dial');
+        $strategy = (string) config('filament-issabel-click-to-call.originate_strategy', 'custom_agent');
+        $displayNumber = ChilePhoneNormalizer::normalize($callerIdNumber ?? $destination, withCountryCode: false) ?? $destination;
         $callerId = $this->buildCallerId(
             extension: $extension,
             destination: $destination,
             callerIdName: $callerIdName,
             callerIdNumber: $callerIdNumber,
+            displayNumber: $displayNumber,
         );
         $actionId = 'ctc-'.bin2hex(random_bytes(8));
         $channel = $this->buildAgentChannel($extension, $strategy);
-        $displayNumber = ChilePhoneNormalizer::normalize($callerIdNumber ?? $destination, withCountryCode: false) ?? $destination;
 
         $lines = $this->buildOriginateLines(
             actionId: $actionId,
@@ -76,10 +77,16 @@ final class IssabelAmiGateway
 
     private function buildAgentChannel(string $extension, string $strategy): string
     {
-        if ($strategy === 'local_agent') {
-            $agentContext = (string) config('filament-issabel-click-to-call.agent_context', 'originate-skipvm');
+        if ($strategy === 'custom_agent') {
+            $context = (string) config('filament-issabel-click-to-call.agent_dial_context', 'filament-click-to-call');
 
-            return sprintf('Local/%s@%s', $extension, $agentContext);
+            return sprintf('Local/%s@%s', $extension, $context);
+        }
+
+        if ($strategy === 'local_agent') {
+            $context = (string) config('filament-issabel-click-to-call.agent_context', 'from-internal');
+
+            return sprintf('Local/%s@%s', $extension, $context);
         }
 
         return sprintf('%s/%s', $this->credentials->channelDriver, $extension);
@@ -104,11 +111,14 @@ final class IssabelAmiGateway
             'CallerID: '.$callerId,
             'Async: true',
             'Timeout: 30000',
-            ...$this->originateVariables($extension, $destination, $strategy),
-            ...$this->callerIdOverrideVariables($displayNumber),
+            ...$this->originateVariables($extension, $destination, $displayNumber, $strategy),
         ];
 
-        if ($strategy === 'local_agent' || $strategy === 'context_exten') {
+        if (! $this->usesAgentDialContext($strategy)) {
+            $lines = [...$lines, ...$this->callerIdOverrideVariables($displayNumber)];
+        }
+
+        if ($this->usesContextExten($strategy)) {
             $lines[] = 'Context: '.$this->credentials->dialContext;
             $lines[] = 'Exten: '.$destination;
             $lines[] = 'Priority: 1';
@@ -128,20 +138,46 @@ final class IssabelAmiGateway
         return $lines;
     }
 
+    private function usesAgentDialContext(string $strategy): bool
+    {
+        return in_array($strategy, ['custom_agent', 'local_agent', 'context_exten'], true);
+    }
+
+    private function usesContextExten(string $strategy): bool
+    {
+        return in_array($strategy, ['custom_agent', 'local_agent', 'context_exten'], true);
+    }
+
     /**
      * @return list<string>
      */
-    private function originateVariables(string $extension, string $destination, string $strategy): array
-    {
-        return [
+    private function originateVariables(
+        string $extension,
+        string $destination,
+        string $displayNumber,
+        string $strategy,
+    ): array {
+        $base = [
             'Variable: AMPUSER='.$extension,
             'Variable: __OriginatingExtension='.$extension,
+        ];
+
+        if ($strategy !== 'custom_agent') {
+            return $base;
+        }
+
+        $formatted = ChilePhoneNormalizer::formatLocalDisplay($displayNumber) ?? $displayNumber;
+
+        return [
+            ...$base,
+            'Variable: CTC_DEST='.$destination,
+            'Variable: CTC_NAME='.$formatted,
+            'Variable: CTC_NUM='.$displayNumber,
         ];
     }
 
     /**
-     * Visor del anexo: solo el nombre (celular formateado). Nunca tocar CALLERID(num):
-     * FreePBX enruta la salida por anexo; si num=celular va a bad-number ("número equivocado").
+     * Fallback AMI overrides when custom_agent dialplan is not installed.
      *
      * @return list<string>
      */
@@ -208,7 +244,6 @@ final class IssabelAmiGateway
         stream_set_timeout($socket, $this->credentials->readTimeoutSeconds);
         $this->socket = $socket;
 
-        // Greeting banner (Asterisk Call Manager...)
         $this->readResponse();
     }
 
@@ -286,6 +321,7 @@ final class IssabelAmiGateway
         string $destination,
         ?string $callerIdName,
         ?string $callerIdNumber,
+        string $displayNumber,
     ): string {
         $mode = $this->credentials->callerIdDisplay;
 
@@ -294,7 +330,6 @@ final class IssabelAmiGateway
 
         $formattedDestination = ChilePhoneNormalizer::formatLocalDisplay($localNumber) ?? $localNumber;
 
-        // FreePBX: num=anexo para enrutar; nombre=celular para el visor del ejecutivo.
         $number = match ($mode) {
             'extension' => $extension,
             'custom' => $this->credentials->callerIdNumber ?: $extension,

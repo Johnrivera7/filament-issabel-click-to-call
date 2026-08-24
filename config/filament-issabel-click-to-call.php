@@ -49,17 +49,25 @@ return [
     'dial_format' => env('ISSABEL_PBX_DIAL_FORMAT', 'local_9'),
 
     /*
-    | Context for the agent leg (FreePBX/Issabel skips voicemail on no-answer).
+    | Custom dialplan context on Issabel (extensions_custom.conf) that sets
+    | CALLERID to CTC_DEST before Dial(SIP/anexo). Required for agent display.
+    | See resources/issabel/filament-click-to-call.conf
+    */
+    'agent_dial_context' => env('ISSABEL_PBX_AGENT_DIAL_CONTEXT', 'filament-click-to-call'),
+
+    /*
+    | Context for local_agent strategy (legacy FreePBX originate-skipvm).
     */
     'agent_context' => env('ISSABEL_PBX_AGENT_CONTEXT', 'from-internal'),
 
     /*
     | AMI originate strategy:
-    | - application_dial: SIP/{anexo} + Dial(Local/{destino}) — probado en Issabel UAC
+    | - custom_agent: Local/{anexo}@agent_dial_context → from-internal/{destino} (visor correcto)
+    | - application_dial: SIP/{anexo} + Dial(Local/{destino}) — visor = CNAM anexo
     | - local_agent: Local/{anexo}@agent_context → from-internal/{destino}
     | - context_exten: SIP/{anexo} → {dial_context}/{destino}
     */
-    'originate_strategy' => env('ISSABEL_PBX_ORIGINATE_STRATEGY', 'application_dial'),
+    'originate_strategy' => env('ISSABEL_PBX_ORIGINATE_STRATEGY', 'custom_agent'),
 
     'caller_id_name' => env('ISSABEL_PBX_CALLER_ID_NAME', 'Filament Click-to-Call'),
 
