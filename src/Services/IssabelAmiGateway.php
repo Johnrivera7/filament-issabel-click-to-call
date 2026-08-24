@@ -119,6 +119,21 @@ final class IssabelAmiGateway
         }
 
         if ($this->usesContextExten($strategy)) {
+            // custom_agent: no ir directo a from-internal con CID=móvil (bad-number).
+            // filament-ctc-out resetea CID al anexo y luego Goto from-internal/{destino}.
+            if ($strategy === 'custom_agent') {
+                $outContext = (string) config(
+                    'filament-issabel-click-to-call.outbound_reset_context',
+                    'filament-ctc-out',
+                );
+                // Exten = destino real (no "s"): no depende de herencia CTC_DEST.
+                $lines[] = 'Context: '.$outContext;
+                $lines[] = 'Exten: '.$destination;
+                $lines[] = 'Priority: 1';
+
+                return $lines;
+            }
+
             $lines[] = 'Context: '.$this->credentials->dialContext;
             $lines[] = 'Exten: '.$destination;
             $lines[] = 'Priority: 1';
@@ -166,13 +181,16 @@ final class IssabelAmiGateway
             return $base;
         }
 
+        // __CTC_* heredan al otro lado del Local (filament-ctc-out).
+        // Visor: name/num = celular. Tras contestar, ctc-out pone num=anexo.
         $formatted = ChilePhoneNormalizer::formatLocalDisplay($displayNumber) ?? $displayNumber;
 
         return [
             ...$base,
-            'Variable: CTC_DEST='.$destination,
-            'Variable: CTC_NAME='.$formatted,
-            'Variable: CTC_NUM='.$displayNumber,
+            'Variable: __CTC_DEST='.$destination,
+            'Variable: __CTC_NAME='.$formatted,
+            'Variable: __CTC_NUM='.$destination,
+            'Variable: __CTC_ANEXO='.$extension,
         ];
     }
 

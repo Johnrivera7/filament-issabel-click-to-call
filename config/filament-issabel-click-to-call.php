@@ -56,6 +56,12 @@ return [
     'agent_dial_context' => env('ISSABEL_PBX_AGENT_DIAL_CONTEXT', 'filament-click-to-call'),
 
     /*
+    | Tras contestar (custom_agent): resetea CALLERID al anexo y Goto from-internal.
+    | Obligatorio en Issabel junto a filament-click-to-call (ver dialplan conf).
+    */
+    'outbound_reset_context' => env('ISSABEL_PBX_OUTBOUND_RESET_CONTEXT', 'filament-ctc-out'),
+
+    /*
     | Context for local_agent strategy (legacy FreePBX originate-skipvm).
     */
     'agent_context' => env('ISSABEL_PBX_AGENT_CONTEXT', 'from-internal'),
