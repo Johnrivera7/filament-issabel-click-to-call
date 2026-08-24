@@ -134,19 +134,9 @@ final class IssabelAmiGateway
      */
     private function originateVariables(string $extension, string $destination, string $strategy): array
     {
-        $base = [
+        return [
             'Variable: AMPUSER='.$extension,
             'Variable: __OriginatingExtension='.$extension,
-        ];
-
-        if ($strategy !== 'application_dial') {
-            return $base;
-        }
-
-        return [
-            ...$base,
-            'Variable: REALCALLERIDNUM='.$extension,
-            'Variable: CALLERID(num)='.$extension,
         ];
     }
 

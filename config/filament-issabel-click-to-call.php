@@ -51,15 +51,15 @@ return [
     /*
     | Context for the agent leg (FreePBX/Issabel skips voicemail on no-answer).
     */
-    'agent_context' => env('ISSABEL_PBX_AGENT_CONTEXT', 'originate-skipvm'),
+    'agent_context' => env('ISSABEL_PBX_AGENT_CONTEXT', 'from-internal'),
 
     /*
     | AMI originate strategy:
-    | - local_agent: Local/{anexo}@agent_context → from-internal/{destino} (FreePBX standard)
-    | - application_dial: SIP/{anexo} + Dial(Local/{destino}@context) — legacy fallback
+    | - application_dial: SIP/{anexo} + Dial(Local/{destino}) — probado en Issabel UAC
+    | - local_agent: Local/{anexo}@agent_context → from-internal/{destino}
     | - context_exten: SIP/{anexo} → {dial_context}/{destino}
     */
-    'originate_strategy' => env('ISSABEL_PBX_ORIGINATE_STRATEGY', 'local_agent'),
+    'originate_strategy' => env('ISSABEL_PBX_ORIGINATE_STRATEGY', 'application_dial'),
 
     'caller_id_name' => env('ISSABEL_PBX_CALLER_ID_NAME', 'Filament Click-to-Call'),
 
