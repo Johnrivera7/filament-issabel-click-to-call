@@ -25,7 +25,7 @@
     .stage {
       width: 2560px; height: 1440px; position: relative;
       padding: 96px 112px; display: grid;
-      grid-template-columns: 1.05fr 1fr; gap: 80px; align-items: center;
+      grid-template-columns: 1fr 1.15fr; gap: 72px; align-items: center;
       background:
         radial-gradient(900px 600px at 8% 12%, rgba(0,180,216,.18), transparent 60%),
         radial-gradient(800px 520px at 92% 88%, rgba(123,44,191,.14), transparent 55%),
@@ -43,7 +43,7 @@
     .logo { height: 96px; margin-bottom: 36px; display: block; }
     h1 {
       font-size: 82px; line-height: 1.06; letter-spacing: -0.03em;
-      font-weight: 800; margin-bottom: 28px; max-width: 11ch;
+      font-weight: 800; margin-bottom: 28px; max-width: 12ch;
     }
     h1 span {
       background: linear-gradient(90deg, var(--iss-cyan), var(--iss-purple));
@@ -51,7 +51,7 @@
     }
     .lead {
       font-size: 34px; line-height: 1.4; color: var(--iss-muted);
-      max-width: 30ch; margin-bottom: 44px;
+      max-width: 32ch; margin-bottom: 44px;
     }
     .pills { display: flex; flex-wrap: wrap; gap: 16px; }
     .pill {
@@ -70,34 +70,63 @@
     }
     .card-head {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 36px 44px; border-bottom: 1px solid var(--iss-border);
+      padding: 32px 40px; border-bottom: 1px solid var(--iss-border);
       background: linear-gradient(180deg, #F8FAFC, #fff);
     }
-    .card-head img { height: 52px; }
+    .card-head img { height: 48px; }
     .tag {
-      font-size: 22px; font-weight: 800; color: #fff; background: var(--iss-purple);
-      border-radius: 999px; padding: 12px 20px;
+      font-size: 20px; font-weight: 800; color: #fff; background: var(--iss-purple);
+      border-radius: 999px; padding: 10px 18px;
     }
-    .card-body { padding: 40px 44px 44px; display: grid; gap: 24px; }
-    .row-table {
-      display: grid; grid-template-columns: 1.2fr 1fr 1fr auto;
-      gap: 16px; align-items: center; padding: 22px 24px;
-      border: 1px solid var(--iss-border); border-radius: 16px; background: #FAFAFA;
+    .card-body { padding: 32px 40px 40px; }
+    .resource-title {
+      font-size: 28px; font-weight: 800; margin-bottom: 6px;
     }
-    .row-table.head { background: #F3F4F6; font-size: 20px; font-weight: 700; color: var(--iss-muted); }
-    .mono { font-family: ui-monospace, Menlo, monospace; font-size: 24px; }
+    .resource-sub {
+      font-size: 20px; color: var(--iss-muted); margin-bottom: 24px;
+    }
+    .table {
+      border: 1px solid var(--iss-border); border-radius: 16px; overflow: hidden;
+    }
+    .table-row {
+      display: grid; grid-template-columns: 1.3fr 1fr 0.7fr auto;
+      gap: 16px; align-items: center; padding: 20px 24px;
+      border-bottom: 1px solid var(--iss-border); background: #fff;
+    }
+    .table-row:last-child { border-bottom: 0; }
+    .table-row.head {
+      background: #F3F4F6; font-size: 18px; font-weight: 700;
+      color: var(--iss-muted); padding: 16px 24px;
+    }
+    .table-row.highlight {
+      background: linear-gradient(90deg, rgba(0,180,216,.08), rgba(123,44,191,.06));
+      outline: 2px solid rgba(0,180,216,.35);
+      outline-offset: -2px;
+    }
+    .contact-name { font-size: 24px; font-weight: 700; }
+    .contact-meta { font-size: 18px; color: var(--iss-muted); margin-top: 4px; }
+    .mono { font-family: ui-monospace, Menlo, monospace; font-size: 22px; color: var(--iss-ink); }
     .btn-call {
       background: #16A34A; color: #fff; border: 0; border-radius: 12px;
-      padding: 14px 22px; font-size: 22px; font-weight: 800;
+      padding: 14px 22px; font-size: 20px; font-weight: 800;
       display: inline-flex; align-items: center; gap: 10px;
+      box-shadow: 0 4px 14px rgba(22,163,74,.35);
     }
-    .field label { display: block; font-size: 20px; font-weight: 700; color: var(--iss-muted); margin-bottom: 8px; }
-    .field .input {
-      height: 64px; border: 2px solid var(--iss-border); border-radius: 14px;
-      background: #F9FAFB; display: flex; align-items: center; padding: 0 20px;
-      font-size: 26px; font-family: ui-monospace, Menlo, monospace;
+    .btn-call.primary {
+      transform: scale(1.06);
+      box-shadow: 0 8px 24px rgba(22,163,74,.45);
     }
-    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .action-hint {
+      margin-top: 24px; padding: 18px 22px; border-radius: 14px;
+      background: #F0FDF4; border: 1px solid #BBF7D0;
+      font-size: 20px; color: #166534; font-weight: 600;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .code {
+      font-family: ui-monospace, Menlo, monospace; font-size: 18px;
+      background: #fff; border: 1px solid #BBF7D0; border-radius: 8px;
+      padding: 6px 10px; color: #15803D;
+    }
     .corner {
       position: absolute; right: 112px; bottom: 48px;
       font-size: 24px; color: var(--iss-muted); font-weight: 700;
@@ -117,11 +146,11 @@
       <div class="badge"><span>Filament 4.x / 5.x · Laravel 11–13</span></div>
       <img class="logo" src="brand/issabel-logo.svg" alt="Issabel">
       <h1>Click-to-Call <span>Issabel</span></h1>
-      <p class="lead">Originate calls from Filament tables and forms through Asterisk AMI — ring the agent extension, then dial the customer.</p>
+      <p class="lead">Add a call button to any Filament table or form. Ring the agent extension via AMI, then connect the customer.</p>
       <div class="pills">
-        <div class="pill alt">AMI Originate</div>
-        <div class="pill">Filament Action</div>
-        <div class="pill">Chile phone normalize</div>
+        <div class="pill alt">ClickToCallAction</div>
+        <div class="pill">Any resource</div>
+        <div class="pill">AMI Originate</div>
         <div class="pill">Settings UI</div>
       </div>
     </div>
@@ -129,21 +158,46 @@
       <div class="accent-bar"></div>
       <div class="card-head">
         <img src="brand/issabel-logo.svg" alt="">
-        <span class="tag">Cobranza · Ficha alumno</span>
+        <span class="tag">Filament · Table action</span>
       </div>
       <div class="card-body">
-        <div class="row-table head">
-          <div>Alumno</div><div>Celular</div><div>Anexo</div><div></div>
+        <div class="resource-title">Contacts</div>
+        <div class="resource-sub">Drop-in action for CRM, support, sales, or any panel</div>
+        <div class="table">
+          <div class="table-row head">
+            <div>Contact</div><div>Phone</div><div>Ext.</div><div></div>
+          </div>
+          <div class="table-row">
+            <div>
+              <div class="contact-name">Maria Lopez</div>
+              <div class="contact-meta">Sales lead</div>
+            </div>
+            <div class="mono">+1 555 0100</div>
+            <div class="mono">101</div>
+            <div><button class="btn-call">Call</button></div>
+          </div>
+          <div class="table-row highlight">
+            <div>
+              <div class="contact-name">James Chen</div>
+              <div class="contact-meta">Support ticket #4821</div>
+            </div>
+            <div class="mono">+1 555 0188</div>
+            <div class="mono">102</div>
+            <div><button class="btn-call primary">📞 Call</button></div>
+          </div>
+          <div class="table-row">
+            <div>
+              <div class="contact-name">Ana Ruiz</div>
+              <div class="contact-meta">Follow-up</div>
+            </div>
+            <div class="mono">+34 612 345 678</div>
+            <div class="mono">103</div>
+            <div><button class="btn-call">Call</button></div>
+          </div>
         </div>
-        <div class="row-table">
-          <div><strong>Fabiola Cristi</strong><br><span class="mono">11.601.556-0</span></div>
-          <div class="mono">9 5759 2274</div>
-          <div class="mono">2151</div>
-          <div><button class="btn-call">📞 Llamar</button></div>
-        </div>
-        <div class="grid2">
-          <div class="field"><label>ISSABEL_PBX_HOST</label><div class="input">172.16.10.50</div></div>
-          <div class="field"><label>ISSABEL_PBX_AMI_PORT</label><div class="input">5038</div></div>
+        <div class="action-hint">
+          <span>One line in your resource:</span>
+          <span class="code">ClickToCallAction::make(...)</span>
         </div>
       </div>
     </div>

@@ -17,28 +17,44 @@
     }
     .stage {
       width: 1920px; height: 1080px; padding: 64px 80px;
-      display: grid; grid-template-columns: 1fr 1.1fr; gap: 48px; align-items: center;
+      display: grid; grid-template-columns: 1fr 1.15fr; gap: 48px; align-items: center;
     }
     img.logo { height: 72px; margin-bottom: 24px; }
     h1 { font-size: 58px; line-height: 1.08; font-weight: 800; margin-bottom: 16px; }
     h1 span { color: var(--iss-cyan); }
-    p { font-size: 26px; color: var(--iss-muted); max-width: 22ch; line-height: 1.4; }
+    p { font-size: 26px; color: var(--iss-muted); max-width: 24ch; line-height: 1.4; margin-bottom: 28px; }
+    .pill {
+      display: inline-block; background: #fff; border: 1px solid var(--iss-border);
+      border-radius: 999px; padding: 12px 20px; font-size: 20px; font-weight: 700;
+      color: var(--iss-purple);
+    }
     .card {
       background: #fff; border: 2px solid var(--iss-border); border-radius: 24px;
       overflow: hidden; box-shadow: 0 24px 48px rgba(17,24,39,.1);
     }
     .bar { height: 8px; background: linear-gradient(90deg, var(--iss-cyan), var(--iss-purple)); }
-    .inner { padding: 32px 36px; }
+    .inner { padding: 28px 32px 32px; }
+    .title { font-size: 24px; font-weight: 800; margin-bottom: 4px; }
+    .sub { font-size: 18px; color: var(--iss-muted); margin-bottom: 20px; }
+    .table { border: 1px solid var(--iss-border); border-radius: 14px; overflow: hidden; }
     .row {
-      display: grid; grid-template-columns: 1fr auto auto; gap: 20px; align-items: center;
-      padding: 20px; border: 1px solid var(--iss-border); border-radius: 14px; background: #FAFAFA;
-      margin-top: 20px;
+      display: grid; grid-template-columns: 1.2fr 1fr 0.6fr auto; gap: 16px; align-items: center;
+      padding: 18px 20px; border-bottom: 1px solid var(--iss-border); background: #fff;
     }
+    .row:last-child { border-bottom: 0; }
+    .row.head { background: #F3F4F6; font-size: 16px; font-weight: 700; color: var(--iss-muted); padding: 14px 20px; }
+    .row.focus {
+      background: linear-gradient(90deg, rgba(0,180,216,.1), rgba(123,44,191,.06));
+      outline: 2px solid rgba(0,180,216,.3); outline-offset: -2px;
+    }
+    .name { font-size: 20px; font-weight: 700; }
+    .meta { font-size: 15px; color: var(--iss-muted); margin-top: 2px; }
+    .mono { font-family: ui-monospace, Menlo, monospace; font-size: 18px; }
     .btn {
       background: #16A34A; color: #fff; border: 0; border-radius: 10px;
-      padding: 12px 20px; font-size: 20px; font-weight: 800;
+      padding: 12px 20px; font-size: 18px; font-weight: 800;
+      box-shadow: 0 4px 12px rgba(22,163,74,.35);
     }
-    .mono { font-family: ui-monospace, Menlo, monospace; font-size: 22px; }
   </style>
 </head>
 <body>
@@ -46,16 +62,36 @@
     <div>
       <img class="logo" src="brand/issabel-logo.svg" alt="Issabel">
       <h1>Click-to-Call <span>Issabel</span></h1>
-      <p>Filament plugin · Asterisk AMI · ring agent, dial customer</p>
+      <p>Call button for any Filament table or form — AMI originate to your PBX.</p>
+      <span class="pill">ClickToCallAction</span>
     </div>
     <div class="card">
       <div class="bar"></div>
       <div class="inner">
-        <strong style="font-size:22px;color:var(--iss-muted)">DATOS ESTUDIANTE</strong>
-        <div class="row">
-          <div><strong>Fabiola Cristi</strong><br><span class="mono">9 5759 2274</span></div>
-          <div class="mono">Anexo 2151</div>
-          <button class="btn">📞 Llamar</button>
+        <div class="title">Contacts</div>
+        <div class="sub">CRM · Support · Sales</div>
+        <div class="table">
+          <div class="row head">
+            <div>Contact</div><div>Phone</div><div>Ext.</div><div></div>
+          </div>
+          <div class="row focus">
+            <div>
+              <div class="name">Maria Lopez</div>
+              <div class="meta">Sales lead</div>
+            </div>
+            <div class="mono">+1 555 0100</div>
+            <div class="mono">101</div>
+            <button class="btn">📞 Call</button>
+          </div>
+          <div class="row">
+            <div>
+              <div class="name">James Chen</div>
+              <div class="meta">Support</div>
+            </div>
+            <div class="mono">+1 555 0188</div>
+            <div class="mono">102</div>
+            <button class="btn">Call</button>
+          </div>
         </div>
       </div>
     </div>
