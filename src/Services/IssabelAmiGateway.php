@@ -107,11 +107,16 @@ final class IssabelAmiGateway
     public function activeChannels(?string $extension = null): array
     {
         if (! $this->credentials->isConfigured()) {
-            return [];
+            throw new RuntimeException('Issabel AMI credentials are incomplete.');
         }
 
         $events = $this->session(function (): array {
-            $this->sendAction(['Action: CoreShowChannels']);
+            $response = $this->sendAction(['Action: CoreShowChannels']);
+
+            // Sin Success no llega EventList: leer eventos colgaría hasta el timeout.
+            if (($response['Response'] ?? '') !== 'Success') {
+                throw new RuntimeException((string) ($response['Message'] ?? 'AMI CoreShowChannels failed'));
+            }
 
             return $this->readEventList('CoreShowChannelsComplete');
         });
@@ -131,6 +136,10 @@ final class IssabelAmiGateway
      */
     public function isExtensionInCall(string $extension): bool
     {
+        if (! $this->credentials->isConfigured()) {
+            throw new RuntimeException('Issabel AMI credentials are incomplete.');
+        }
+
         $status = $this->extensionState($extension);
 
         if ($status !== null && AmiExtensionState::isKnown($status)) {

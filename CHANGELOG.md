@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.1 — 2026-09-08
+
+- `isExtensionInCall()` / `activeChannels()` now throw when AMI is unconfigured or
+  `CoreShowChannels` is rejected, instead of reporting the extension as idle
+- `CoreShowChannels` responses are validated before reading the event list, so a
+  denied action no longer blocks until the socket read timeout
+
 ## 1.1.0 — 2026-09-08
 
 - **Extra call legs prevented** — before Originate the plugin checks the live extension

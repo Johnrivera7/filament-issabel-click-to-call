@@ -250,6 +250,9 @@ Ask the PBX directly when you need the state elsewhere:
 FilamentIssabelClickToCallPlugin::get()->clickToCall()->extensionInCall('2151');
 ```
 
+It throws when the PBX cannot answer (AMI unreachable or the AMI user lacks read
+permission). Treat that as **unknown**, never as idle, or you are back to extra legs.
+
 ## Agent requirements
 
 Each cobranza agent needs:
