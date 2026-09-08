@@ -9,7 +9,6 @@ use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 use JohnRivera7\FilamentIssabelClickToCall\FilamentIssabelClickToCallPlugin;
-use JohnRivera7\FilamentIssabelClickToCall\Services\ClickToCallService;
 use Throwable;
 
 final class ClickToCallAction

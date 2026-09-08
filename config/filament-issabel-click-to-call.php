@@ -75,6 +75,20 @@ return [
     */
     'originate_strategy' => env('ISSABEL_PBX_ORIGINATE_STRATEGY', 'custom_agent'),
 
+    /*
+    | Anti "extra legs": before Originate, check whether the extension is already
+    | ringing/talking (AMI ExtensionState hint, CoreShowChannels as fallback) and
+    | hold an atomic lock so two fast clicks cannot originate twice.
+    */
+    'prevent_extra_legs' => (bool) env('ISSABEL_PBX_PREVENT_EXTRA_LEGS', true),
+
+    'originate_lock_seconds' => (int) env('ISSABEL_PBX_ORIGINATE_LOCK_SECONDS', 15),
+
+    /*
+    | Context holding the extension hints (FreePBX/Issabel default: ext-local).
+    */
+    'hint_context' => env('ISSABEL_PBX_HINT_CONTEXT', 'ext-local'),
+
     'caller_id_name' => env('ISSABEL_PBX_CALLER_ID_NAME', 'Filament Click-to-Call'),
 
     /*

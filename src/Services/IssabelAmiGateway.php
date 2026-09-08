@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace JohnRivera7\FilamentIssabelClickToCall\Services;
 
+use JohnRivera7\FilamentIssabelClickToCall\Support\AmiExtensionState;
 use JohnRivera7\FilamentIssabelClickToCall\Support\ChilePhoneNormalizer;
 use JohnRivera7\FilamentIssabelClickToCall\Support\IssabelAmiCredentials;
 use RuntimeException;
@@ -62,9 +63,7 @@ final class IssabelAmiGateway
             strategy: $strategy,
         );
 
-        $response = $this->sendAction($lines);
-        $this->logout();
-        $this->disconnect();
+        $response = $this->session(fn (): array => $this->sendAction($lines));
 
         if (($response['Response'] ?? '') !== 'Success') {
             $message = $response['Message'] ?? 'AMI Originate failed';
@@ -73,6 +72,121 @@ final class IssabelAmiGateway
         }
 
         return $actionId;
+    }
+
+    /**
+     * Hint status of an extension, or null when the PBX cannot answer.
+     */
+    public function extensionState(string $extension, ?string $context = null): ?int
+    {
+        $extension = trim($extension);
+        if ($extension === '' || ! $this->credentials->isConfigured()) {
+            return null;
+        }
+
+        $context ??= (string) config('filament-issabel-click-to-call.hint_context', 'ext-local');
+
+        $response = $this->session(fn (): array => $this->sendAction([
+            'Action: ExtensionState',
+            'Exten: '.$extension,
+            'Context: '.$context,
+        ]));
+
+        if (($response['Response'] ?? '') !== 'Success' || ! isset($response['Status'])) {
+            return null;
+        }
+
+        return (int) $response['Status'];
+    }
+
+    /**
+     * Live channels, optionally only those belonging to one extension.
+     *
+     * @return list<array<string, string>>
+     */
+    public function activeChannels(?string $extension = null): array
+    {
+        if (! $this->credentials->isConfigured()) {
+            return [];
+        }
+
+        $events = $this->session(function (): array {
+            $this->sendAction(['Action: CoreShowChannels']);
+
+            return $this->readEventList('CoreShowChannelsComplete');
+        });
+
+        if ($extension === null || trim($extension) === '') {
+            return $events;
+        }
+
+        return array_values(array_filter(
+            $events,
+            static fn (array $event): bool => AmiExtensionState::channelBelongsTo($event, $extension),
+        ));
+    }
+
+    /**
+     * True when originating again would ring a second leg on the same extension.
+     */
+    public function isExtensionInCall(string $extension): bool
+    {
+        $status = $this->extensionState($extension);
+
+        if ($status !== null && AmiExtensionState::isKnown($status)) {
+            return AmiExtensionState::occupies($status);
+        }
+
+        // No hint configured for the extension: fall back to live channels.
+        return $this->activeChannels($extension) !== [];
+    }
+
+    /**
+     * @template TReturn
+     *
+     * @param  callable(): TReturn  $callback
+     * @return TReturn
+     */
+    private function session(callable $callback): mixed
+    {
+        $this->connect();
+
+        try {
+            $this->login();
+
+            return $callback();
+        } finally {
+            $this->logout();
+            $this->disconnect();
+        }
+    }
+
+    /**
+     * @return list<array<string, string>>
+     */
+    private function readEventList(string $completeEvent, int $maxBlocks = 500): array
+    {
+        $events = [];
+
+        for ($i = 0; $i < $maxBlocks; $i++) {
+            $block = $this->readResponse();
+            if ($block === []) {
+                break;
+            }
+
+            $event = $block['Event'] ?? null;
+            if ($event === null) {
+                continue;
+            }
+
+            if ($event === $completeEvent) {
+                break;
+            }
+
+            $events[] = $block;
+        }
+
+        return $events;
     }
 
     private function buildAgentChannel(string $extension, string $strategy): string

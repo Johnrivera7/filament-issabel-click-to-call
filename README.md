@@ -219,6 +219,37 @@ FilamentIssabelClickToCallPlugin::get()->clickToCall()->call(
 );
 ```
 
+## Avoiding extra call legs
+
+A second Originate while the extension is still ringing or talking creates another
+leg: the agent phone rings twice and the CDR shows duplicated calls. Before every
+Originate the plugin now:
+
+1. Takes an atomic cache lock per extension (`originate_lock_seconds`, default 15 s),
+   so two fast clicks cannot both reach AMI.
+2. Asks the PBX for the **live** extension state — `ExtensionState` on the hint
+   context, falling back to `CoreShowChannels` when the extension has no hint.
+   Ringing, talking and on-hold all block a new call; idle and unavailable do not.
+
+The call is refused with a translated message instead of adding the leg. Because the
+check reads live PBX state, the lock clears **as soon as the agent hangs up** — no
+CDR sync or manual refresh needed.
+
+```env
+ISSABEL_PBX_PREVENT_EXTRA_LEGS=true
+ISSABEL_PBX_ORIGINATE_LOCK_SECONDS=15
+ISSABEL_PBX_HINT_CONTEXT=ext-local
+```
+
+Your AMI user needs **read** permission for `call`/`reporting` (already included in
+the `manager.conf` sample above) so these two read actions are allowed.
+
+Ask the PBX directly when you need the state elsewhere:
+
+```php
+FilamentIssabelClickToCallPlugin::get()->clickToCall()->extensionInCall('2151');
+```
+
 ## Agent requirements
 
 Each cobranza agent needs:
